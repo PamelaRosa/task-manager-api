@@ -45,7 +45,7 @@ app.post('/lists', (req, res) => {
 
 app.patch('/lists/:id', (req, res) => {
     // Atualizar a lista especifica (a lista com seu ID na URL) com os novos valores no corpo de requisição do JSON
-    List.findOneAndUpdate({_id: req.params.id}, {
+    List.findOneAndUpdate({ _id: req.params.id }, {
         $set: req.body
     }).then(() => {
         res.sendStatus(200);
@@ -61,6 +61,60 @@ app.delete('/lists/:id', (req, res) => {
     });
 });
 
+// Tasks methods
+
+app.get('/lists/:listId/tasks', (req, res) => {
+    // Retornar todas as tarefas que pertencem a uma lista especifica ( especificada pelo listId)
+    Task.find({
+        _listId: req.params.listId
+    }).then((tasks) => {
+        res.send(tasks);
+    });
+});
+
+// Método para encontrar apenas uma tarefa utilizando o id
+//Feita por questões de estudo, mas não será utilizada por enquanto.
+// app.get('/lists/:listId/tasks/:taskId', (req, res) => {
+//     Task.findOne({
+//         _id: req.params.taskId,
+//         _listId: req.params.listId
+//     }).then((task) => {
+//         res.send(task);
+//     })
+// });
+
+app.post('/lists/:listId/tasks', (req, res) => {
+    // Criar uma nova tarefa em uma lista especificada pelo listId
+    let newTask = new Task({
+        title: req.body.title,
+        _listId: req.params.listId
+    });
+    newTask.save().then((newTaskDoc) => {
+        res.send(newTaskDoc);
+    });
+});
+
+app.patch('/lists/:listId/tasks/:taskId', (req, res) => {
+    // Atualizar uma tarefa existente ( especificada pelo taskId)
+    Task.findOneAndUpdate({
+        _id: req.params.taskId,
+        _listId: req.params.listId
+    }, {
+        $set: req.body
+    }
+    ).then(() => {
+        res.sendStatus(200);
+    });
+});
+
+app.delete('/lists/:listId/tasks/:taskId', (req, res) => {
+    Task.findOneAndRemove({
+        _id: req.params.taskId,
+        _listId: req.params.listId
+    }).then((removedTaskDoc) => {
+        res.send(removedTaskDoc);
+    });
+})
 
 
 app.listen(3000, () => {
